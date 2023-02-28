@@ -83,7 +83,8 @@ client.on('messageCreate', async (message) => {
             if(!guildQueue)
                 queue.stop();
         });
-        message.channel.send(`Now playing ${song}`)
+        sendGuildMessage(message, `Now playing ${song}!!`)
+        //message.channel.send(`Now playing ${song}`)
     }
 
     if(command === 'playlist') {
@@ -166,3 +167,9 @@ client.on('messageCreate', async (message) => {
 
 // client.login(TOKEN);
 client.login(TOKEN);
+
+// TODO: refactor these into their own modules (.js files)
+// for now this is event-driven; the bot can only message after a user asks for a command
+function sendGuildMessage(guildMessage, msg) {
+    guildMessage.channel.send(msg);
+}
