@@ -1,8 +1,16 @@
+// Module Imports
+
 const { REST, Routes } = require('discord.js');
 require("dotenv").config();
+const { Client, GatewayIntentBits } = require('discord.js');
+const { Player } = require("discord-music-player");
+const { RepeatMode } = require('discord-music-player');
+const play = require("./commands/play");
+
+// Constants
 const TOKEN = process.env.TOKEN;
 const PREFIX = '%'
-const { Client, GatewayIntentBits } = require('discord.js');
+
 const client = new Client({ intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -11,12 +19,15 @@ const client = new Client({ intents: [
     ]
 });
 
+// TODO: create command handler (hashmap is best)
+//   key = command name
+//   value = function that handles functionality
+
 const settings = {
     prefix: PREFIX,
     token: TOKEN
 };
 
-const { Player } = require("discord-music-player");
 const player = new Player(client, {
     leaveOnEmpty: true, // This options are optional.
     deafenOnJoin: true,
@@ -65,8 +76,6 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-const { RepeatMode } = require('discord-music-player');
-
 // music bot
 client.on('messageCreate', async (message) => {
     if (message.content[0] != PREFIX) return;
@@ -75,16 +84,17 @@ client.on('messageCreate', async (message) => {
     let guildQueue = client.player.getQueue(message.guild.id);
 
     if(command === 'play') {
-        let queue = client.player.createQueue(message.guild.id);
-        await queue.join(message.member.voice.channel);
-        console.log(args);
-        let song = await queue.play(args.join(' ')).catch(err => {
-            console.log(err);
-            if(!guildQueue)
-                queue.stop();
-        });
-        sendGuildMessage(message, `Now playing ${song}!!`)
-        //message.channel.send(`Now playing ${song}`)
+        // let queue = client.player.createQueue(message.guild.id);
+        // await queue.join(message.member.voice.channel);
+        // console.log(args);
+        // let song = await queue.play(args.join(' ')).catch(err => {
+        //     console.log(err);
+        //     if(!guildQueue)
+        //         queue.stop();
+        // });
+        // sendGuildMessage(message, `Now playing ${song}!!`)
+        // //message.channel.send(`Now playing ${song}`)
+        play.handler(client, message, args);
     }
 
     if(command === 'playlist') {
@@ -168,8 +178,11 @@ client.on('messageCreate', async (message) => {
 // client.login(TOKEN);
 client.login(TOKEN);
 
+const DEBUG_MODE = false;
+
 // TODO: refactor these into their own modules (.js files)
 // for now this is event-driven; the bot can only message after a user asks for a command
 function sendGuildMessage(guildMessage, msg) {
+    if (DEBUG_MODE) console.log(msg);
     guildMessage.channel.send(msg);
 }
